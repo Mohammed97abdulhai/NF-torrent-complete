@@ -47,13 +47,19 @@ public class TorrentManagingService extends Service implements ClientActivityLis
             public void run() {
                 try {
                   /*  if(!intializae) {*/
-                        sharedTorrent = new SharedTorrent(torrent, desti);
-                        client = new Client(selfAdress, sharedTorrent, id);
 
+
+                        sharedTorrent = new SharedTorrent(torrent, desti);
+                        client = new Client(selfAdress, sharedTorrent, id,handler);
                         client.registerObserver(listener);
                         client.download();
                         torrents.put(id, client);
-                        intializae =true;
+
+
+
+
+
+                       // intializae =true;
                   /*  }*/
                  /*   Bundle b = new Bundle();
                     b.putString("percentage", String.valueOf(handlepiecespercentage()));

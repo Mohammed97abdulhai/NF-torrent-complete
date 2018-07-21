@@ -548,7 +548,11 @@ public class SharingPeer extends Peer implements MessageListener{
                      break;
                   }
 
-                  p.record(piece.getBlock(), piece.getOffset());
+                   p.record(piece.getBlock(), piece.getOffset());
+
+                   /* to update download rate in client */
+                   fireDownRateChange(piece.getBlock().capacity());
+
 
                   // If the block offset equals the piece size and the block
                   // length is 0, it means the piece has been entirely
@@ -580,6 +584,24 @@ public class SharingPeer extends Peer implements MessageListener{
       }
 
    }
+
+    @Override
+    public void handleuploadRate(long bytes) {
+        fireUpRateChange(bytes);
+    }
+
+    private void fireUpRateChange(long bytes){
+       for (PeerActivityListener listener : this.listeners) {
+           listener.handleUploadRateChange(bytes);
+       }
+   }
+
+    private void fireDownRateChange(long bytes){
+        for (PeerActivityListener listener : this.listeners) {
+            listener.handleDownloadRateChange(bytes);
+        }
+    }
+
 
    private void firePeerChoked() {
       for (PeerActivityListener listener : this.listeners) {

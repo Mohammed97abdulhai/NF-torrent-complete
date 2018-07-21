@@ -1,6 +1,7 @@
 package com.example.asus.Core.client;
 
 
+import android.os.Handler;
 import android.util.Log;
 
 import com.example.asus.Core.announce.Announce;
@@ -11,6 +12,7 @@ import com.example.asus.Core.connection.ConnectionHandler;
 import com.example.asus.Core.connection.IncomingConnectionListener;
 import com.example.asus.Core.messages.PeerMessage;
 import com.example.asus.Core.peer.PeerActivityListener;
+import com.example.asus.Core.peer.Rate;
 import com.example.asus.Core.peer.SharingPeer;
 import com.example.ichigo.Gui.ClientActivityListener;
 
@@ -52,6 +54,7 @@ public class Client  implements Runnable,
 
 
 
+
     public enum ClientState {
         WAITING,
         VALIDATING,
@@ -60,6 +63,11 @@ public class Client  implements Runnable,
         ERROR,
         DONE;
     };
+
+
+
+
+    RateUpdater updaterThread;
 
     private static final String BITTORRENT_ID_PREFIX = "-TO0042-";
 
@@ -85,7 +93,7 @@ public class Client  implements Runnable,
 
     private ClientActivityListener observer;
 
-    public Client(InetAddress address, SharedTorrent torrent,int id)
+    public Client(InetAddress address, SharedTorrent torrent,int id , Handler handler)
             throws UnknownHostException, IOException {
 
 
@@ -113,10 +121,14 @@ public class Client  implements Runnable,
         this.announce.register(this);
 
 
+        this.updaterThread = new RateUpdater(handler);
+
 
         this.peers = new ConcurrentHashMap<String, SharingPeer>();
         this.connected = new ConcurrentHashMap<String, SharingPeer>();
         this.random = new Random(System.currentTimeMillis());
+
+
     }
     public void setMaxDownloadRate(double rate) {
         this.torrent.setMaxDownloadRate(rate);
@@ -284,6 +296,7 @@ public class Client  implements Runnable,
 
         this.announce.start();
         this.service.start();
+        this.updaterThread.start();
 
 
         int optimisticIterations = 0;
@@ -331,6 +344,7 @@ public class Client  implements Runnable,
         }
 
         this.announce.stop();
+        this.updaterThread.stop();
 
         // Close all peer connections
         Log.i("info","Client: Closing all remaining peer connections...");
@@ -663,6 +677,17 @@ public class Client  implements Runnable,
         peer.unbind(true);
     }
 
+    @Override
+    public void handleDownloadRateChange(long bytes) {
+
+       updaterThread.updatedownRate(bytes);
+    }
+
+    @Override
+    public void handleUploadRateChange(long bytes) {
+
+        updaterThread.updateUpRate(bytes);
+    }
 
 
     private synchronized void seed() {

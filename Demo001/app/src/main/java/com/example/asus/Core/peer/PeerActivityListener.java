@@ -121,4 +121,19 @@ public interface PeerActivityListener {
    public void handleIOException(SharingPeer peer, IOException ioe);
 
 
+   /*
+   handler for change in download speed from across all peers
+
+    */
+   public void handleDownloadRateChange(long bytes);
+
+   /*
+
+   handler for change in upload speed from across all peers
+
+    */
+
+   public void handleUploadRateChange(long bytes);
+
+
 }

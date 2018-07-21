@@ -651,4 +651,14 @@ public class SharedTorrent extends Torrent implements PeerActivityListener {
    public synchronized void handleIOException(SharingPeer peer, IOException ioe) {
             /* Do nothing */
    }
+
+   @Override
+   public void handleDownloadRateChange(long bytes) {
+
+   }
+
+   @Override
+   public void handleUploadRateChange(long bytes) {
+
+   }
 }

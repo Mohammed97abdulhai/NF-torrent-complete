@@ -245,6 +245,8 @@ public class PeerExchange {
                                 size, message);
 
                         Log.i("info" , "message sent :" + message.toString() + "by:" + peer.toString());
+
+
                         for (MessageListener listener : listeners)
                             listener.handleMessage(message);
                     } catch (ParseException pe) {
@@ -299,6 +301,11 @@ public class PeerExchange {
                                 throw new EOFException(
                                         "Reached end of stream while writing");
                             }
+                        }
+
+                        if (message instanceof PeerMessage.PieceMessage){
+                             for (MessageListener listener : listeners)
+                                  listener.handleuploadRate(size);
                         }
 
                         // Wait if needed to reach configured upload rate.
