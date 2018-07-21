@@ -250,6 +250,10 @@ public class PeerExchange {
                     } catch (ParseException pe) {
                         pe.printStackTrace();
                     }
+                    catch (IllegalStateException ise){
+                        //do nothing
+                    }
+
                 }
             } catch (IOException ioe) {
                 this.handleIOE(ioe);

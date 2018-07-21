@@ -49,6 +49,7 @@ public class TorrentManagingService extends Service implements ClientActivityLis
                   /*  if(!intializae) {*/
                         sharedTorrent = new SharedTorrent(torrent, desti);
                         client = new Client(selfAdress, sharedTorrent, id);
+
                         client.registerObserver(listener);
                         client.download();
                         torrents.put(id, client);
@@ -184,6 +185,7 @@ public class TorrentManagingService extends Service implements ClientActivityLis
         Bundle b = new Bundle();
         Message m = new Message();
 
+        b.putString("event","stateChange");
         b.putString("state",state.toString());
         b.putInt("id", Id);
         m.setData(b);
@@ -195,6 +197,7 @@ public class TorrentManagingService extends Service implements ClientActivityLis
         Message m = new Message();
         Bundle b = new Bundle();
 
+        b.putString("event","pieceCompletion");
         b.putInt("percentage",precenetage);
         b.putInt("id",Id);
         m.setData(b);

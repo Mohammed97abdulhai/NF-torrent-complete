@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     ArrayList items = new ArrayList();
     ArrayList <Uri> itemspaths = new ArrayList<>();
     ArrayList<Integer> progresses = new ArrayList<>();
-
+    ArrayList<String> states = new ArrayList<>();
     //
     private int storage_permission_code =1;
 
@@ -73,12 +73,30 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         {
             Bundle bundle = msg.getData();
             // the code for getting the progress
-            int temp = bundle.getInt("percentage");
-            Log.i("info","this is the percentage of the download" +temp);
             int id1 = bundle.getInt("id");
-            progresses.set(id1,temp);
-            progresses.add(temp);
-            
+
+            String event= (String) bundle.get("event");
+            if(event.equals("pieceCompletion")){
+
+
+                int temp = bundle.getInt("percentage");
+                progresses.set(id1,temp);
+                progresses.add(temp);
+                Log.i("info","this is the percentage of the download" +temp);
+
+
+            }
+
+            else if(event.equals("stateChange")){
+
+                String text =bundle.getString("state");
+                states.set(id1, text);
+            }
+            else{
+                //code for rate computation
+
+            }
+
             listadapter.notifyDataSetChanged();
         }
     };
@@ -99,8 +117,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
         itemspaths = getItemspaths();
         items = getItems();
-
-        listadapter = new Listadapter(this, items,itemspaths,progresses);
+        listadapter = new Listadapter(this, items,itemspaths,progresses, states);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(listadapter);
@@ -196,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     items.add(name);
                     itemspaths.add(path);
                     progresses.add(0);
+                    states.add("waiting");
                     saveItems();
                     listadapter.notifyItemInserted(itemspaths.size() - 1);
                 }
