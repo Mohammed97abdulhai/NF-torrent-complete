@@ -1,6 +1,8 @@
 package com.example.asus.Core.client;
 
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.example.asus.Core.peer.Rate;
@@ -16,15 +18,17 @@ public class RateUpdater implements Runnable{
     private boolean stop;
 
     Handler handler ;
+    int id;
 
 
     RatePerSec downloadRate;
     RatePerSec uploadRate;
 
 
-    public RateUpdater(Handler handler){
+    public RateUpdater(Handler handler , int id){
 
         this.handler = handler;
+        this.id =id;
         thread = null;
         downloadRate = new RatePerSec();
         uploadRate = new RatePerSec();
@@ -62,13 +66,17 @@ public class RateUpdater implements Runnable{
         if(!stop){
 
 
-            Log.i("info","OMG FUCK U ICHIGO U SUCK DICKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + "upRate:" +String.valueOf(downloadRate.get()/1024)+"downRate:" );
-
+            Message m = new Message();
+            Bundle b = new Bundle();
+            Log.i("info","OMG FUCK U ICHIGO U SUCK DICKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + "upRate:" +String.valueOf(uploadRate.get()/1024)+"downRate:" );
+            b.putString("event","update_the_speed");
+            b.putFloat("down_rate", downloadRate.get()/1024);
+            b.putFloat("up_rate", uploadRate.get());
+            b.putInt("Id",id);
+            m.setData(b);
+            handler.sendMessage(m);
             handler.postDelayed(this, 1000);
-
         }
-
-
     }
     public void updatedownRate(long bytes){
 

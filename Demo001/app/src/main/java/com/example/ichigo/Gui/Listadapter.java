@@ -22,14 +22,19 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     ArrayList<Uri> itemspaths;
     ArrayList<Integer> progresses;
     ArrayList<String> states;
+    ArrayList<Float> download;
+    ArrayList<Float> upload;
 
-    public Listadapter(Context context, ArrayList<String> items, ArrayList<Uri> paths, ArrayList<Integer> progresses, ArrayList<String> state)
+    public Listadapter(Context context, ArrayList<String> items, ArrayList<Uri> paths, ArrayList<Integer> progresses,
+                       ArrayList<String> state ,ArrayList<Float> download, ArrayList<Float> upload)
     {
         this.context = context;
         this.items = items;
         this.itemspaths =paths;
         this.progresses = progresses;
         this.states = state;
+        this.download = download;
+        this.upload = upload;
     }
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -41,6 +46,7 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
             ((Item)holder).textView.setText(items.get(position));
+        ((Item)holder).speed_state.setText("Down:" + download.get(position) +"KB" + "/" + "upload: " + upload.get(position) +"KB");
             ((Item) holder).rowlayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -83,6 +89,7 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView download_state;
         ImageButton button;
         ProgressBar progressBar;
+        TextView speed_state;
         RelativeLayout rowlayout;
         boolean togglebutton;
         public Item(View itemView) {
@@ -92,6 +99,7 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             download_state = (TextView) itemView.findViewById(R.id.downloading_state);
             button = (ImageButton) itemView.findViewById(R.id.downloadbutton);
             progressBar = (ProgressBar) itemView.findViewById(R.id.torrentprogressbar);
-           rowlayout = (RelativeLayout) itemView.findViewById(R.id.rowlayout);}
+            speed_state = (TextView) itemView.findViewById(R.id.speedtext_on_the_mainscreen);
+            rowlayout = (RelativeLayout) itemView.findViewById(R.id.rowlayout);}
     }
 }

@@ -21,8 +21,6 @@ public class RatePerSec {
 
 
     public synchronized void add(long count) {
-
-
         this.bytes += count;
     }
 }

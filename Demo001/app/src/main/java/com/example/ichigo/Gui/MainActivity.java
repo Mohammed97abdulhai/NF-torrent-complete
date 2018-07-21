@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     ArrayList <Uri> itemspaths = new ArrayList<>();
     ArrayList<Integer> progresses = new ArrayList<>();
     ArrayList<String> states = new ArrayList<>();
+    ArrayList<Float> download = new ArrayList<>();
+    ArrayList<Float> upload = new ArrayList<>();
     //
     private int storage_permission_code =1;
 
@@ -113,8 +116,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     String text =bundle.getString("state");
                     states.set(id1, text);
                 }
-                else{
-                    //code for rate computation
+                else {
+                    float down = bundle.getFloat("down_rate");
+                    Log.i("forororororororor", String.valueOf(down));
+                    float up = bundle.getFloat("up_rate");
+                    download.set(id1,down);
+                    upload.set(id1,up);
                 }
 
                 listadapter.notifyDataSetChanged();
@@ -128,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        listadapter = new Listadapter(this, items,itemspaths,progresses, states);
+        listadapter = new Listadapter(this, items,itemspaths,progresses, states, download, upload);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(listadapter);
@@ -237,6 +244,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     itemspaths.add(path);
                     progresses.add(0);
                     states.add("waiting");
+                    download.add(0.0f);
+                    upload.add(0.0f);
 
                     listadapter.notifyItemInserted(itemspaths.size() - 1);
                 }

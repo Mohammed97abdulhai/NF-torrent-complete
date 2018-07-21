@@ -121,7 +121,7 @@ public class Client  implements Runnable,
         this.announce.register(this);
 
 
-        this.updaterThread = new RateUpdater(handler);
+        this.updaterThread = new RateUpdater(handler, this.id);
 
 
         this.peers = new ConcurrentHashMap<String, SharingPeer>();
