@@ -145,7 +145,7 @@ public class Client  implements Runnable,
     private synchronized void setState(ClientState state) {
         if (this.state != state) {
             this.state = state;
-           // this.observer.handleStateChange(id,state);
+            this.observer.handleStateChange(id,state);
 
         }
 
@@ -474,7 +474,6 @@ public class Client  implements Runnable,
     @Override
     public void handleNewPeerConnection(SocketChannel channel, byte[] peerId) {
 
-        observer.handleMessage("connection!!!");
 
         Peer search = new Peer(
                 channel.socket().getInetAddress().getHostAddress(),
@@ -518,7 +517,6 @@ public class Client  implements Runnable,
     @Override
     public void handleAnnounceResponse(int interval, int complete, int incomplete) {
 
-        observer.handleMessage("interval");
 
 
     }
@@ -526,7 +524,6 @@ public class Client  implements Runnable,
     @Override
     public void handleDiscoveredPeers(List<Peer> peers) {
 
-        observer.handleMessage("peers discovered");
 
 
 
@@ -568,33 +565,30 @@ public class Client  implements Runnable,
 
     @Override
     public void handlePeerChoked(SharingPeer peer) {
-        observer.handleMessage("choked us");
 
     }
 
     @Override
     public void handlePeerReady(SharingPeer peer) {
-        observer.handleMessage("hes ready ");
 
     }
 
     @Override
     public void handlePieceAvailability(SharingPeer peer, Piece piece) {
 
-        observer.handleMessage("Have message");
 
     }
 
     @Override
     public void handleBitfieldAvailability(SharingPeer peer, BitSet availablePieces) {
 
-        observer.handleMessage("bitfield message");
+
 
     }
 
     @Override
     public void handlePieceSent(SharingPeer peer, Piece piece) {
-        observer.handleMessage("piece message");
+
 
     }
 
@@ -611,6 +605,8 @@ public class Client  implements Runnable,
                 this.torrent.markCompleted(piece);
                 logger.info("Completed download of {} from {}. " +
                                 "We now have {}/{} pieces" );
+
+                this.observer.handlePieceCompletion(id,(int)this.torrent.getCompletion());
 
                 // Send a HAVE message to all connected peers
                 PeerMessage have = PeerMessage.HaveMessage.craft(piece.getIndex());

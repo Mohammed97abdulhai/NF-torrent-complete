@@ -20,12 +20,14 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Context context;
     ArrayList<String> items;
     ArrayList<Uri> itemspaths;
+    ArrayList<Integer> progresses;
 
-    public Listadapter(Context context, ArrayList<String> items, ArrayList<Uri> paths)
+    public Listadapter(Context context, ArrayList<String> items, ArrayList<Uri> paths, ArrayList<Integer> progresses)
     {
         this.context = context;
         this.items = items;
         this.itemspaths =paths;
+        this.progresses = progresses;
     }
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -48,7 +50,7 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
                 }
             });
-            ((Item)holder).progressBar.setProgress(20);
+            ((Item)holder).progressBar.setProgress(progresses.get(position));
             ((Item) holder).button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

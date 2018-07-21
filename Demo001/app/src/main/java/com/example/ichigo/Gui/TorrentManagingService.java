@@ -7,7 +7,10 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
@@ -27,8 +30,11 @@ import java.util.Map;
 public class TorrentManagingService extends Service implements ClientActivityListener{
     Map<Integer,Client>torrents = new HashMap<>();
 
-
+    Client client;
+    SharedTorrent sharedTorrent;
+    Handler handler;
     final static String GROUP_KEY_Messages = "group_key_messages";
+    boolean intializae =false;
 
 
 
@@ -40,12 +46,21 @@ public class TorrentManagingService extends Service implements ClientActivityLis
             @Override
             public void run() {
                 try {
-                    SharedTorrent sharedTorrent = new SharedTorrent(torrent,desti);
-                    Client client = new Client(selfAdress,sharedTorrent,id);
-                    client.registerObserver(listener);
-                    client.download();
-                    torrents.put(id,client);
-
+                  /*  if(!intializae) {*/
+                        sharedTorrent = new SharedTorrent(torrent, desti);
+                        client = new Client(selfAdress, sharedTorrent, id);
+                        client.registerObserver(listener);
+                        client.download();
+                        torrents.put(id, client);
+                        intializae =true;
+                  /*  }*/
+                 /*   Bundle b = new Bundle();
+                    b.putString("percentage", String.valueOf(handlepiecespercentage()));
+                    Log.i("percentage","this is the download percentage for now: "+String.valueOf(handlepiecespercentage()));
+                    Message msg = handler.obtainMessage();
+                    msg.setData(b);
+                    handler.sendMessage(msg);
+                    handler.postDelayed(this,1000);*/
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (NoSuchAlgorithmException e) {
@@ -55,10 +70,6 @@ public class TorrentManagingService extends Service implements ClientActivityLis
             }
         });
         t.start();
-
-
-
-
 
     }
 
@@ -107,6 +118,7 @@ public class TorrentManagingService extends Service implements ClientActivityLis
         NotificationManager mNotificationManager=(NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(1,notification);
     }
+
     @Override
     public int onStartCommand(Intent intent,int flags, int startID)
     {
@@ -118,8 +130,14 @@ public class TorrentManagingService extends Service implements ClientActivityLis
         NotificationManager d;
 
 
+
         return START_NOT_STICKY;
     }
+    public void setHandler(Handler handler)
+    {
+        this.handler = handler;
+    }
+
 
     @Override
     public void onRebind(Intent intent) {
@@ -141,10 +159,47 @@ public class TorrentManagingService extends Service implements ClientActivityLis
         return mbinder;
     }
 
-    @Override
-    synchronized public void handleMessage(String text) {
+ /*   @Override
+    public int handlepiecespercentage() {
+        int downloaded =0;
+        if(sharedTorrent.isInitialized()) {
+            downloaded = this.sharedTorrent.getCompletedPieces().length();
+        }
+        int all = this.sharedTorrent.getPieceCount();
+        int percentage =0;
+        if(downloaded != 0) {
+             percentage = (int) (downloaded * 100 / all);
+        }
+        return percentage;
+    }*/
 
-        updateNotification(text);
+    @Override
+    public void handleRateChange(float upload_rate, float download_rate, int id) {
+
+    }
+
+    @Override
+    public void handleStateChange(int Id, Client.ClientState state) {
+
+        Bundle b = new Bundle();
+        Message m = new Message();
+
+        b.putString("state",state.toString());
+        b.putInt("id", Id);
+        m.setData(b);
+        handler.sendMessage(m);
+    }
+
+    @Override
+    public synchronized void handlePieceCompletion(int Id, int precenetage) {
+        Message m = new Message();
+        Bundle b = new Bundle();
+
+        b.putInt("percentage",precenetage);
+        b.putInt("id",Id);
+        m.setData(b);
+
+        handler.sendMessage(m);
     }
 
     public class MyBinder extends Binder{

@@ -11,7 +11,9 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -46,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     Listadapter listadapter;
     ArrayList items = new ArrayList();
     ArrayList <Uri> itemspaths = new ArrayList<>();
+    ArrayList<Integer> progresses = new ArrayList<>();
+
     //
     private int storage_permission_code =1;
 
@@ -62,6 +66,23 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     //id tracking
     int id = 0;
 
+    Handler handler = new Handler()
+    {
+        @Override
+        public void handleMessage(Message msg)
+        {
+            Bundle bundle = msg.getData();
+            // the code for getting the progress
+            int temp = bundle.getInt("percentage");
+            Log.i("info","this is the percentage of the download" +temp);
+            int id1 = bundle.getInt("id");
+            progresses.set(id1,temp);
+            progresses.add(temp);
+            
+            listadapter.notifyDataSetChanged();
+        }
+    };
+
 
 
     Torrent torrent;
@@ -72,14 +93,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         //
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
 
         itemspaths = getItemspaths();
         items = getItems();
-        listadapter = new Listadapter(this, items,itemspaths);
+
+        listadapter = new Listadapter(this, items,itemspaths,progresses);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(listadapter);
@@ -131,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 
     Uri path;
-    String save_location = "download";
+    String save_location = "Download";
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // TODO Auto-generated method stub
@@ -174,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     }
                     items.add(name);
                     itemspaths.add(path);
+                    progresses.add(0);
                     saveItems();
                     listadapter.notifyItemInserted(itemspaths.size() - 1);
                 }
@@ -228,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             TorrentManagingService.MyBinder binder = (TorrentManagingService.MyBinder) service;
             torrent_service = binder.getservice();
             isbound = true;
+            torrent_service.setHandler(handler);
         }
 
         @Override
