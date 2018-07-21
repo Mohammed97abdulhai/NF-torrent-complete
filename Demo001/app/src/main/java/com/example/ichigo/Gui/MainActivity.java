@@ -32,8 +32,13 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.example.asus.Core.base.Torrent;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -66,42 +71,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     //id tracking
     int id = 0;
 
-    Handler handler = new Handler()
-    {
-        @Override
-        public void handleMessage(Message msg)
-        {
-            Bundle bundle = msg.getData();
-            // the code for getting the progress
-            int id1 = bundle.getInt("id");
-
-            String event= (String) bundle.get("event");
-            if(event.equals("pieceCompletion")){
-
-
-                int temp = bundle.getInt("percentage");
-                progresses.set(id1,temp);
-                progresses.add(temp);
-                Log.i("info","this is the percentage of the download" +temp);
-
-
-            }
-
-            else if(event.equals("stateChange")){
-
-                String text =bundle.getString("state");
-                states.set(id1, text);
-            }
-            else{
-                //code for rate computation
-
-            }
-
-            listadapter.notifyDataSetChanged();
-        }
-    };
-
-
+    Handler handler;
 
     Torrent torrent;
     boolean permissiongranted =false;
@@ -115,8 +85,49 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
 
+
+
+        handler = new Handler()
+        {
+            @Override
+            public void handleMessage(Message msg)
+            {
+                Bundle bundle = msg.getData();
+                // the code for getting the progress
+                int id1 = bundle.getInt("id");
+
+                String event= (String) bundle.get("event");
+                if(event.equals("pieceCompletion")){
+
+
+                    int temp = bundle.getInt("percentage");
+                    progresses.set(id1,temp);
+                    progresses.add(temp);
+                    Log.i("info","this is the percentage of the download" +temp);
+
+
+                }
+
+                else if(event.equals("stateChange")){
+
+                    String text =bundle.getString("state");
+                    states.set(id1, text);
+                }
+                else{
+                    //code for rate computation
+                }
+
+                listadapter.notifyDataSetChanged();
+            }
+        };
+
         itemspaths = getItemspaths();
         items = getItems();
+        try {
+            progresses = getprogress();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         listadapter = new Listadapter(this, items,itemspaths,progresses, states);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -134,12 +145,24 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         startService(startmainservice);
         bindService(startmainservice,this, Context.BIND_AUTO_CREATE);
     }
+    public ArrayList<Integer> getprogress() throws FileNotFoundException {
+
+        Gson gson = new Gson();
+        JsonReader jsonReader = new JsonReader(new FileReader("progress.json"));
+        ArrayList<Integer> temp = gson.fromJson(jsonReader,Integer[].class);
+        return temp;
+    }
 
     @Override
     protected void onStop() {
         super.onStop();
         if (isbound) {
             unbindService(this);
+            try {
+                saveItems();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             isbound = false;
         }
     }
@@ -214,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     itemspaths.add(path);
                     progresses.add(0);
                     states.add("waiting");
-                    saveItems();
+
                     listadapter.notifyItemInserted(itemspaths.size() - 1);
                 }
                 break;
@@ -277,8 +300,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
         }
 
-    public void saveItems()
-    {
+    public void saveItems() throws IOException {
         SharedPreferences list_saver = getSharedPreferences("x",MODE_APPEND);
         SharedPreferences.Editor editor = list_saver.edit();
         Set<String> set = new HashSet<>(items);
@@ -289,6 +311,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             tempo.add(uri.toString());
         }
         Set<String> set2 = new HashSet<>(tempo);
+
+        Set<Integer> progresses1 = new HashSet<>(progresses);
+        Gson gson = new Gson();
+        String save_progress = gson.toJson(progresses);
+
+
+        FileWriter writer = new FileWriter("progress.json");
+        writer.write(save_progress);
         editor.putStringSet("names", set);
         editor.putStringSet("paths", set2);
         editor.apply();
