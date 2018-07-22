@@ -27,6 +27,7 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     ArrayList<String> states;
     ArrayList<Float> download;
     ArrayList<Float> upload;
+    TorrentManagingService service;
 
     public Listadapter(Context context, ArrayList<String> items, ArrayList<Uri> paths, ArrayList<Torrent> torrents, ArrayList<Integer> progresses,
                        ArrayList<String> state , ArrayList<Float> download, ArrayList<Float> upload)
@@ -39,6 +40,12 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.states = state;
         this.download = download;
         this.upload = upload;
+    }
+
+    public void setService(TorrentManagingService service){
+
+        this.service = service;
+
     }
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -74,13 +81,19 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     if(((Item) holder).togglebutton) {
                         ((Item) holder).button.setImageResource(R.drawable.ic_pause_icon);
                         ((Item)holder).togglebutton = !((Item)holder).togglebutton;
-                        ((Item)holder).download_state.setText("Downloading");
+                        service.add_torrent(torrents.get(position),itemspaths.get(position),position);
+
+
+
                     }
                     else
                     {
                         ((Item) holder).button.setImageResource(R.drawable.ic_play_icon);
                         ((Item)holder).togglebutton = !((Item)holder).togglebutton;
-                        ((Item)holder).download_state.setText("paused");
+                        service.stopTorrent(position);
+                        ((Item)holder).download_state.setText("stopped");
+
+
                     }
                 }
             });

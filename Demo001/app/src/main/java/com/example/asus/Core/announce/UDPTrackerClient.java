@@ -90,7 +90,6 @@ public class UDPTrackerClient extends TrackerClient {
 	private Date connectionExpiration;
 	private long connectionId;
 	private int transactionId;
-	private boolean stop;
 
 	private enum State {
 		CONNECT_REQUEST,
@@ -355,6 +354,7 @@ public class UDPTrackerClient extends TrackerClient {
 				new byte[UDP_PACKET_LENGTH],
 				UDP_PACKET_LENGTH);
 			this.socket.receive(p);
+
 			return ByteBuffer.wrap(p.getData(), 0, p.getLength());
 		} catch (SocketTimeoutException ste) {
 			throw ste;

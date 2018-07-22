@@ -22,12 +22,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Announcer for HTTP trackers.
- *
- * @author mpetazzoni
- * @see <a href="http://wiki.theory.org/BitTorrentSpecification#Tracker_Request_Parameters">BitTorrent tracker request specification</a>
- */
+
 public class HTTPTrackerClient extends TrackerClient {
 
 	protected static final Logger logger =
@@ -44,24 +39,7 @@ public class HTTPTrackerClient extends TrackerClient {
 		super(torrent, peer, tracker);
 	}
 
-	/**
-	 * Build, send and process a tracker announce request.
-	 *
-	 * <p>
-	 * This function first builds an announce request for the specified event
-	 * with all the required parameters. Then, the request is made to the
-	 * tracker and the response analyzed.
-	 * </p>
-	 *
-	 * <p>
-	 * All registered {@link AnnounceResponseListener} objects are then fired
-	 * with the decoded payload.
-	 * </p>
-	 *
-	 * @param event The announce event type (can be AnnounceEvent.NONE for
-	 * periodic updates).
-	 * @param inhibitEvents Prevent event listeners from being notified.
-	 */
+
 	@Override
 	public void announce(TrackerMessage.AnnounceRequestMessage.RequestEvent event,
 		boolean inhibitEvents) throws AnnounceException {
@@ -141,17 +119,12 @@ public class HTTPTrackerClient extends TrackerClient {
 		}
 	}
 
-	/**
-	 * Build the announce request tracker message.
-	 *
-	 * @param event The announce event (can be <tt>NONE</tt> or <em>null</em>)
-	 * @return Returns an instance of a {@link HTTPAnnounceRequestMessage}
-	 * that can be used to generate the fully qualified announce URL, with
-	 * parameters, to make the announce request.
-	 * @throws UnsupportedEncodingException
-	 * @throws IOException
-	 * @throws
-	 */
+	@Override
+	protected void close() {
+		this.stop = true;
+
+	}
+
 	private HTTPAnnounceRequestMessage buildAnnounceRequest(
 		TrackerMessage.AnnounceRequestMessage.RequestEvent event)
 		throws UnsupportedEncodingException, IOException,

@@ -85,9 +85,14 @@ public class Announce  {
 
     public void stop(){
 
+		for (TrackerClient client: allClients){
+			client.close();
+		}
+
+
         for(TrackerClient client: allClients)
         {
-            client.stop();
+            client.stop(true);
         }
 
     }

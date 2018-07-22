@@ -301,6 +301,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             torrent_service = binder.getservice();
             isbound = true;
             torrent_service.setMainHandler(handler);
+            this.listadapter.setService(torrent_service);
+
         }
 
         @Override

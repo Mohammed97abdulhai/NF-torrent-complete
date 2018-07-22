@@ -30,8 +30,8 @@ public  abstract class TrackerClient implements Runnable{
 	protected final Peer peer;
 	protected final URI tracker;
     protected int interval;
-    private boolean stop;
-    private boolean forceStop;
+    protected boolean stop;
+    protected boolean forceStop;
     protected Thread thread;
 
 	protected boolean completed = false;
@@ -184,11 +184,11 @@ public  abstract class TrackerClient implements Runnable{
             try {
                 Thread.sleep(this.interval * 1000);
             } catch (InterruptedException ie) {
-                // Ignore
+				Thread.currentThread().interrupt();
             }
         }
 
-        logger.info("Exited announce loop.");
+        Log.i("OMFGOMFG!!!!","tracker:" + tracker.toString());
 
         if (!this.forceStop) {
             // Send the final 'stopped' event to the tracker after a little
@@ -225,23 +225,21 @@ public  abstract class TrackerClient implements Runnable{
     }
 
     public void stop() {
-        this.stop = true;
 
-        if (this.thread != null && this.thread.isAlive()) {
-            this.thread.interrupt();
-
-            try {
-                this.thread.join();
-            } catch (InterruptedException ie) {
-                // Ignore
-            }
-        }
+		if (this.thread != null && this.thread.isAlive()) {
+			try {
+				this.thread.join();
+			} catch (InterruptedException ie) {
+				Thread.currentThread().interrupt();
+			}
+		}
 
         this.close();
         this.thread = null;
     }
 
-    private void stop(boolean hard) {
+
+    public void stop(boolean hard) {
         this.forceStop = hard;
         this.stop();
     }

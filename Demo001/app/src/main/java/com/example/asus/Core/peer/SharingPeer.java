@@ -274,7 +274,7 @@ public class SharingPeer extends Peer implements MessageListener{
 
       synchronized (this.exchangeLock) {
          if (this.exchange != null) {
-          //  this.exchange.stop();
+            this.exchange.stop();
             this.exchange = null;
          }
       }
@@ -550,7 +550,6 @@ public class SharingPeer extends Peer implements MessageListener{
 
                    p.record(piece.getBlock(), piece.getOffset());
 
-                   /* to update download rate in client */
                    fireDownRateChange(piece.getBlock().capacity());
 
 

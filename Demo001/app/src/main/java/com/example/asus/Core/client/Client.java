@@ -59,8 +59,8 @@ public class Client  implements Runnable,
         VALIDATING,
         SHARING,
         SEEDING,
-        ERROR,
-        DONE;
+        STOPPED,
+        ERROR
     };
 
 
@@ -263,7 +263,11 @@ public class Client  implements Runnable,
         } catch (InterruptedException ie) {
             Log.wtf("info","client: Client was interrupted during initialization");
 
-        } finally {
+        } catch (IllegalStateException ile){
+
+        }
+
+        finally {
             if (!this.torrent.isInitialized()) {
                 try {
                     this.service.close();
@@ -332,7 +336,7 @@ public class Client  implements Runnable,
         }
 
 
-        Log.wtf("info","Client: Stopping BitTorrent client connection service ");
+
 
         this.service.stop();
         try {
@@ -342,15 +346,15 @@ public class Client  implements Runnable,
 
         }
 
-        this.announce.stop();
-        this.updaterThread.stop();
-
-        // Close all peer connections
-        Log.i("info","Client: Closing all remaining peer connections...");
-
         for (SharingPeer peer : this.connected.values()) {
             peer.unbind(true);
         }
+
+        this.updaterThread.stop();
+
+
+        this.announce.stop();
+
 
         this.finish();
 
@@ -359,15 +363,7 @@ public class Client  implements Runnable,
     private void finish() {
         this.torrent.close();
 
-        // Determine final state
-        if (this.torrent.isFinished()) {
-            this.setState(ClientState.DONE);
-        } else {
-            this.setState(ClientState.ERROR);
-        }
-
-        Log.i("info","Client: BitTorrent client signing off.");
-
+        this.setState(ClientState.STOPPED);
 
     }
     private Comparator<SharingPeer> getPeerRateComparator() {

@@ -31,6 +31,7 @@ import java.util.Set;
 
 
 public class TorrentManagingService extends Service implements ClientActivityListener{
+
     Map<Integer,Client>torrents = new HashMap<>();
 
     Client client;
@@ -137,6 +138,27 @@ public class TorrentManagingService extends Service implements ClientActivityLis
         this.torrent_handler = handler;
     }
 
+    public void stopTorrent(final int id){
+
+
+        Thread t = new Thread(){
+            @Override
+            public void run() {
+                Client client =  torrents.get(id);
+                client.stop();
+                Log.i("OMG!!!!!!!!!!!!!!!!","torrent is stopped");
+
+            }
+        };
+
+        t.start();
+
+    }
+    public void startTorrent(final int id){
+
+       Client client =  torrents.get(id);
+        client.download();
+    }
 
     public Torrent_data gettorrentdata(int id)
     {
