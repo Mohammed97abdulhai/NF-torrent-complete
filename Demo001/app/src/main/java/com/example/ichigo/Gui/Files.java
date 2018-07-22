@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.asus.Core.base.Torrent;
+
 import java.util.ArrayList;
 
 
@@ -23,60 +25,51 @@ import java.util.ArrayList;
  * create an instance of this fragment.
  */
 public class Files extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
-    private String mParam2;
+    private Torrent filenames;
     Add_torrent mactivity;
     Torrent_Activity mactivity1;
     ArrayList<String>items;
     View row;
+    RecyclerView recyclerView;
+    String activity;
     private OnFragmentInteractionListener mListener;
 
     public Files() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment Files.
-     */
-    public static Files newInstance(String param1, String param2) {
+    public static Files newInstance(String param1, Torrent filenames) {
         Files fragment = new Files();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putSerializable(ARG_PARAM2, filenames);
         fragment.setArguments(args);
         return fragment;
     }
-    RecyclerView recyclerView;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String test = getArguments().getString(ARG_PARAM1);
-        if(test.equals("torrent"))
+
+        if (getArguments() != null) {
+            mParam1 = getArguments().getString(ARG_PARAM1);
+            filenames = (Torrent) getArguments().getSerializable(ARG_PARAM2);
+        }
+        activity= getArguments().getString(ARG_PARAM1);
+        if(activity.equals("torrent"))
         {
             mactivity1 = (Torrent_Activity) getActivity();
             mactivity1.setFilesFragment(this);
-            items = mactivity1.files;
+            items = filenames.getFilenames();
+            //items = mactivity1.files;
         }
         else {
             mactivity = (Add_torrent) getActivity();
             mactivity.setFilesFragment(this);
             items = mactivity.files;
-        }
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
     Files_List_Adapter custom_adapter;
@@ -85,6 +78,12 @@ public class Files extends Fragment {
         row = inflater.inflate(R.layout.fragment_files, container, false);
         recyclerView = (RecyclerView) row.findViewById(R.id.files_list);
         recyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity().getApplicationContext()));
+        if(items != null && activity.equals("torrent"))
+        {
+            custom_adapter = new Files_List_Adapter(this.getContext(), items);
+            recyclerView.setAdapter(custom_adapter);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        }
         return row;
     }
 
@@ -93,13 +92,13 @@ public class Files extends Fragment {
             mListener.onFragmentInteraction(uri);
         }
     }
+    //for the file window in the add torrent only
     public void update(ArrayList<String> filesnames)
     {
         this.items = filesnames;
         custom_adapter = new Files_List_Adapter(this.getContext(), items);
         recyclerView.setAdapter(custom_adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        Toast.makeText(getContext(), items.get(0),Toast.LENGTH_SHORT).show();
     }
 
     @Override

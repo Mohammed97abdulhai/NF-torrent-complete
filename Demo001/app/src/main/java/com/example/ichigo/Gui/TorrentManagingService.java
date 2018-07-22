@@ -17,14 +17,17 @@ import android.util.Log;
 import com.example.asus.Core.base.Torrent;
 import com.example.asus.Core.client.Client;
 import com.example.asus.Core.client.SharedTorrent;
+import com.example.asus.Core.peer.SharingPeer;
 import com.example.asus.Core.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 
 public class TorrentManagingService extends Service implements ClientActivityListener{
@@ -32,7 +35,7 @@ public class TorrentManagingService extends Service implements ClientActivityLis
 
     Client client;
     SharedTorrent sharedTorrent;
-    Handler handler;
+    Handler handler , torrent_handler;
     final static String GROUP_KEY_Messages = "group_key_messages";
     boolean intializae =false;
 
@@ -50,34 +53,18 @@ public class TorrentManagingService extends Service implements ClientActivityLis
 
 
                         sharedTorrent = new SharedTorrent(torrent, desti);
-                        client = new Client(selfAdress, sharedTorrent, id,handler);
+                        client = new Client(selfAdress, sharedTorrent, id,handler ,torrent_handler);
                         client.registerObserver(listener);
                         client.download();
                         torrents.put(id, client);
-
-
-
-
-
-                       // intializae =true;
-                  /*  }*/
-                 /*   Bundle b = new Bundle();
-                    b.putString("percentage", String.valueOf(handlepiecespercentage()));
-                    Log.i("percentage","this is the download percentage for now: "+String.valueOf(handlepiecespercentage()));
-                    Message msg = handler.obtainMessage();
-                    msg.setData(b);
-                    handler.sendMessage(msg);
-                    handler.postDelayed(this,1000);*/
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
-
             }
         });
         t.start();
-
     }
 
 
@@ -140,11 +127,23 @@ public class TorrentManagingService extends Service implements ClientActivityLis
 
         return START_NOT_STICKY;
     }
-    public void setHandler(Handler handler)
+    public void setMainHandler(Handler handler)
     {
         this.handler = handler;
     }
 
+    public void settorrenthandler(Handler handler)
+    {
+        this.torrent_handler = handler;
+    }
+
+
+    public Torrent_data gettorrentdata(int id)
+    {
+        Client client = torrents.get(id);
+        Torrent_data  temp= new Torrent_data(client.getTorrent(),client.getPeers());
+        return temp;
+    }
 
     @Override
     public void onRebind(Intent intent) {
@@ -166,19 +165,6 @@ public class TorrentManagingService extends Service implements ClientActivityLis
         return mbinder;
     }
 
- /*   @Override
-    public int handlepiecespercentage() {
-        int downloaded =0;
-        if(sharedTorrent.isInitialized()) {
-            downloaded = this.sharedTorrent.getCompletedPieces().length();
-        }
-        int all = this.sharedTorrent.getPieceCount();
-        int percentage =0;
-        if(downloaded != 0) {
-             percentage = (int) (downloaded * 100 / all);
-        }
-        return percentage;
-    }*/
 
     @Override
     public void handleRateChange(float upload_rate, float download_rate, int id) {
@@ -195,8 +181,10 @@ public class TorrentManagingService extends Service implements ClientActivityLis
         b.putString("state",state.toString());
         b.putInt("id", Id);
         m.setData(b);
+        if(handler!=null)
         handler.sendMessage(m);
     }
+
 
     @Override
     public synchronized void handlePieceCompletion(int Id, int precenetage) {
@@ -207,8 +195,12 @@ public class TorrentManagingService extends Service implements ClientActivityLis
         b.putInt("percentage",precenetage);
         b.putInt("id",Id);
         m.setData(b);
-
-        handler.sendMessage(m);
+        if(handler!=null) {
+            Log.i("handler","the handler is not null");
+            handler.sendMessage(m);
+        }
+        if(torrent_handler!=null)
+        torrent_handler.sendMessage(m);
     }
 
     public class MyBinder extends Binder{
@@ -216,5 +208,17 @@ public class TorrentManagingService extends Service implements ClientActivityLis
         {
             return TorrentManagingService.this;
         }
+    }
+
+    public static class Torrent_data
+    {
+        public Torrent_data(SharedTorrent torrent , Set<SharingPeer> peers)
+        {
+            this.torrent = torrent;
+            ArrayList<SharingPeer> temp = new ArrayList<>(peers);
+            this.list_of_peers = temp;
+        }
+        SharedTorrent torrent;
+        ArrayList<SharingPeer> list_of_peers;
     }
 }

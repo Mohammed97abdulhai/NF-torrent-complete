@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     Listadapter listadapter;
     ArrayList items = new ArrayList();
     ArrayList <Uri> itemspaths = new ArrayList<>();
+    ArrayList <Torrent> torrents = new ArrayList<>();
     ArrayList<Integer> progresses = new ArrayList<>();
     ArrayList<String> states = new ArrayList<>();
     ArrayList<Float> download = new ArrayList<>();
@@ -89,7 +90,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         setSupportActionBar(toolbar);
 
 
-
         handler = new Handler()
         {
             @Override
@@ -97,26 +97,25 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             {
                 Bundle bundle = msg.getData();
                 // the code for getting the progress
-                int id1 = bundle.getInt("id");
+
 
                 String event= (String) bundle.get("event");
                 if(event.equals("pieceCompletion")){
-
-
+                    int id1 = bundle.getInt("id");
                     int temp = bundle.getInt("percentage");
                     progresses.set(id1,temp);
-                    progresses.add(temp);
                     Log.i("info","this is the percentage of the download" +temp);
 
 
                 }
 
                 else if(event.equals("stateChange")){
-
+                    int id1 = bundle.getInt("id");
                     String text =bundle.getString("state");
                     states.set(id1, text);
                 }
                 else {
+                    int id1 = bundle.getInt("id");
                     float down = bundle.getFloat("down_rate");
                     Log.i("forororororororor", String.valueOf(down));
                     float up = bundle.getFloat("up_rate");
@@ -135,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        listadapter = new Listadapter(this, items,itemspaths,progresses, states, download, upload);
+        listadapter = new Listadapter(this, items,itemspaths,torrents,progresses, states, download, upload);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(listadapter);
@@ -242,6 +241,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     }
                     items.add(name);
                     itemspaths.add(path);
+                    torrents.add(torrent);
                     progresses.add(0);
                     states.add("waiting");
                     download.add(0.0f);
@@ -300,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             TorrentManagingService.MyBinder binder = (TorrentManagingService.MyBinder) service;
             torrent_service = binder.getservice();
             isbound = true;
-            torrent_service.setHandler(handler);
+            torrent_service.setMainHandler(handler);
         }
 
         @Override

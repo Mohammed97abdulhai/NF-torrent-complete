@@ -304,8 +304,10 @@ public class PeerExchange {
                         }
 
                         if (message instanceof PeerMessage.PieceMessage){
+                            Log.i("uploading:","i am sameh and i am dick lover !!!!!!!!!!1<3 d ");
                              for (MessageListener listener : listeners)
                                   listener.handleuploadRate(size);
+
                         }
 
                         // Wait if needed to reach configured upload rate.

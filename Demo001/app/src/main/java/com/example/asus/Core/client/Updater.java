@@ -12,22 +12,29 @@ import com.example.asus.Core.peer.RatePerSec;
  * Created by Asus on 7/21/2018.
  */
 
-public class RateUpdater implements Runnable{
+public class Updater implements Runnable{
 
     private Thread thread;
     private boolean stop;
 
-    Handler handler ;
+    Handler mainHandler;
+    Handler torrentHandler;
     int id;
 
 
     RatePerSec downloadRate;
     RatePerSec uploadRate;
 
+    SharedTorrent torrent;
+    Client client;
 
-    public RateUpdater(Handler handler , int id){
 
-        this.handler = handler;
+    public Updater(Handler mainHandler , Handler torrentHandler, SharedTorrent torrent, Client client, int id){
+
+        this.mainHandler = mainHandler;
+        this.torrentHandler = torrentHandler;
+        this.torrent = torrent;
+        this.client = client;
         this.id =id;
         thread = null;
         downloadRate = new RatePerSec();
@@ -63,8 +70,7 @@ public class RateUpdater implements Runnable{
 
     @Override
     public void run() {
-        if(!stop){
-
+        while (!stop){
 
             Message m = new Message();
             Bundle b = new Bundle();
@@ -72,10 +78,15 @@ public class RateUpdater implements Runnable{
             b.putString("event","update_the_speed");
             b.putFloat("down_rate", downloadRate.get()/1024);
             b.putFloat("up_rate", uploadRate.get());
-            b.putInt("Id",id);
+            b.putInt("id",id);
             m.setData(b);
-            handler.sendMessage(m);
-            handler.postDelayed(this, 1000);
+            if(mainHandler!=null)
+            mainHandler.sendMessage(m);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
     public void updatedownRate(long bytes){

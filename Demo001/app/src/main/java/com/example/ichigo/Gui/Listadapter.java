@@ -13,6 +13,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.asus.Core.base.Torrent;
+
 import java.util.ArrayList;
 
 
@@ -20,17 +22,19 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Context context;
     ArrayList<String> items;
     ArrayList<Uri> itemspaths;
+    ArrayList<Torrent> torrents;
     ArrayList<Integer> progresses;
     ArrayList<String> states;
     ArrayList<Float> download;
     ArrayList<Float> upload;
 
-    public Listadapter(Context context, ArrayList<String> items, ArrayList<Uri> paths, ArrayList<Integer> progresses,
-                       ArrayList<String> state ,ArrayList<Float> download, ArrayList<Float> upload)
+    public Listadapter(Context context, ArrayList<String> items, ArrayList<Uri> paths, ArrayList<Torrent> torrents, ArrayList<Integer> progresses,
+                       ArrayList<String> state , ArrayList<Float> download, ArrayList<Float> upload)
     {
         this.context = context;
         this.items = items;
         this.itemspaths =paths;
+        this.torrents =torrents;
         this.progresses = progresses;
         this.states = state;
         this.download = download;
@@ -46,14 +50,17 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
             ((Item)holder).textView.setText(items.get(position));
-        ((Item)holder).speed_state.setText("Down:" + download.get(position) +"KB" + "/" + "upload: " + upload.get(position) +"KB");
+            ((Item)holder).speed_state.setText("Down:" + download.get(position) +"KB" + "/" + "upload: " + upload.get(position) +"KB");
             ((Item) holder).rowlayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(context, ((Item) holder).textView.getText(),Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(context,Torrent_Activity.class);
+                    intent.putExtra("percentage",progresses.get(position));
+                    intent.putExtra("id",position);
                     intent.putExtra("path",itemspaths.get(position).toString());
                     intent.putExtra("name",items.get(position));
+                    intent.putExtra("torrent",torrents.get(position));
                     context.startActivity(intent);
 
                 }

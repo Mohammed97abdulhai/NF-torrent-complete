@@ -23,7 +23,7 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
                 return tab1;
             }
             case 1:
-                return  Files.newInstance("the first file", "test");
+                return  Files.newInstance("the first file",null);
             default:
                 return null;
         }

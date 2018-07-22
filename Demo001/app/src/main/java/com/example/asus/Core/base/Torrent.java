@@ -98,7 +98,7 @@ public class Torrent implements Serializable{
     private final String hex_info_hash;
 
     private final List<List<URI>> trackers;
-    private final Set<URI> allTrackers;
+    private final ArrayList<URI> allTrackers;
     private final Date creationDate;
     private final String comment;
     private final String createdBy;
@@ -151,7 +151,7 @@ public class Torrent implements Serializable{
          */
         try {
             this.trackers = new ArrayList<List<URI>>();
-            this.allTrackers = new HashSet<URI>();
+            this.allTrackers = new ArrayList<>();
 
             if (this.decoded.containsKey("announce-list")) {
                 List<BEValue> tiers = this.decoded.get("announce-list").getList();
@@ -380,7 +380,7 @@ public class Torrent implements Serializable{
     }
 
 
-    public Set<URI> getAlltrackers(){
+    public ArrayList<URI> getAlltrackers(){
         return this.allTrackers;
     }
 

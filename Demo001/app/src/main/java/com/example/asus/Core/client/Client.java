@@ -12,7 +12,6 @@ import com.example.asus.Core.connection.ConnectionHandler;
 import com.example.asus.Core.connection.IncomingConnectionListener;
 import com.example.asus.Core.messages.PeerMessage;
 import com.example.asus.Core.peer.PeerActivityListener;
-import com.example.asus.Core.peer.Rate;
 import com.example.asus.Core.peer.SharingPeer;
 import com.example.ichigo.Gui.ClientActivityListener;
 
@@ -67,7 +66,7 @@ public class Client  implements Runnable,
 
 
 
-    RateUpdater updaterThread;
+    Updater updaterThread;
 
     private static final String BITTORRENT_ID_PREFIX = "-TO0042-";
 
@@ -93,7 +92,7 @@ public class Client  implements Runnable,
 
     private ClientActivityListener observer;
 
-    public Client(InetAddress address, SharedTorrent torrent,int id , Handler handler)
+    public Client(InetAddress address, SharedTorrent torrent,int id , Handler mainHandler,Handler torrentHandler)
             throws UnknownHostException, IOException {
 
 
@@ -121,7 +120,7 @@ public class Client  implements Runnable,
         this.announce.register(this);
 
 
-        this.updaterThread = new RateUpdater(handler, this.id);
+        this.updaterThread = new Updater(mainHandler,torrentHandler, torrent, this, this.id);
 
 
         this.peers = new ConcurrentHashMap<String, SharingPeer>();

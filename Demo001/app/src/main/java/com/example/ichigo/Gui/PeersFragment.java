@@ -4,9 +4,15 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.example.asus.Core.peer.SharingPeer;
+
+import java.util.ArrayList;
 
 
 /**
@@ -20,33 +26,30 @@ import android.view.ViewGroup;
 public class PeersFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM1 = "list_of_peers";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
+    public ArrayList<SharingPeer> list_of_peers;
+    public ArrayList<String> peer_ip = new ArrayList<>();
+    public ArrayList<Integer> port = new ArrayList<>();
+    public Torrent_Activity mActivity;
+    RecyclerView recyclerView;
+
+    View view;
     private OnFragmentInteractionListener mListener;
 
     public PeersFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment PeersFragment.
-     */
     // TODO: Rename and change types and number of parameters
-    public static PeersFragment newInstance(String param1, String param2) {
+    public static PeersFragment newInstance(ArrayList<SharingPeer> list_peers) {
         PeersFragment fragment = new PeersFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putSerializable(ARG_PARAM1,list_peers);
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,16 +58,29 @@ public class PeersFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+             list_of_peers = (ArrayList<SharingPeer>) getArguments().getSerializable(ARG_PARAM1);
+            for(SharingPeer g:list_of_peers)
+            {
+                peer_ip.add(g.getIp());
+                port.add(g.getPort());
+            }
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_peers, container, false);
+
+        view = inflater.inflate(R.layout.fragment_peers, container, false);
+        recyclerView = (RecyclerView) view.findViewById(R.id.peer_list);
+        if(peer_ip != null)
+        {
+            Peers_list_adapter adapter = new Peers_list_adapter(this.getContext(), peer_ip, port);
+            recyclerView.setAdapter(adapter);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        }
+        recyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity().getApplicationContext()));
+        return  view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
