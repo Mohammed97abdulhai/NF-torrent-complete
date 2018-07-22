@@ -3,7 +3,9 @@ package com.example.ichigo.Gui;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,9 @@ import android.widget.Toast;
 
 import com.example.asus.Core.base.Torrent;
 
+import java.io.File;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 
@@ -27,10 +32,11 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     ArrayList<String> states;
     ArrayList<Float> download;
     ArrayList<Float> upload;
+    ArrayList<String> locations;
     TorrentManagingService service;
 
     public Listadapter(Context context, ArrayList<String> items, ArrayList<Uri> paths, ArrayList<Torrent> torrents, ArrayList<Integer> progresses,
-                       ArrayList<String> state , ArrayList<Float> download, ArrayList<Float> upload)
+                       ArrayList<String> state , ArrayList<Float> download, ArrayList<Float> upload, ArrayList<String> locations)
     {
         this.context = context;
         this.items = items;
@@ -40,6 +46,7 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.states = state;
         this.download = download;
         this.upload = upload;
+        this.locations = locations;
     }
 
     public void setService(TorrentManagingService service){
@@ -81,8 +88,14 @@ public class Listadapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     if(((Item) holder).togglebutton) {
                         ((Item) holder).button.setImageResource(R.drawable.ic_pause_icon);
                         ((Item)holder).togglebutton = !((Item)holder).togglebutton;
-                        service.add_torrent(torrents.get(position),itemspaths.get(position),position);
-
+                        Log.i("location:",Environment.getExternalStorageDirectory() + "/"+locations.get(position));
+                        try {
+                            service.add_torrent(torrents.get(position),new File(Environment.getExternalStorageDirectory() +"/"+ locations.get(position)),position);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (NoSuchAlgorithmException e) {
+                            e.printStackTrace();
+                        }
 
 
                     }

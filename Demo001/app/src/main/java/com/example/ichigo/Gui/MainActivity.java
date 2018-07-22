@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     ArrayList<String> states = new ArrayList<>();
     ArrayList<Float> download = new ArrayList<>();
     ArrayList<Float> upload = new ArrayList<>();
+    ArrayList<String> locations = new ArrayList<>();
     //
     private int storage_permission_code =1;
 
@@ -134,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        listadapter = new Listadapter(this, items,itemspaths,torrents,progresses, states, download, upload);
+        listadapter = new Listadapter(this, items,itemspaths,torrents,progresses, states, download, upload, locations);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(listadapter);
@@ -246,6 +247,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     states.add("waiting");
                     download.add(0.0f);
                     upload.add(0.0f);
+                    locations.add(save_location);
 
                     listadapter.notifyItemInserted(itemspaths.size() - 1);
                 }

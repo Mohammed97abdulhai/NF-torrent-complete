@@ -63,6 +63,8 @@ public class TorrentManagingService extends Service implements ClientActivityLis
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
+                client.setMaxDownloadRate(50.0);
+                client.setMaxUploadRate(50.0);
             }
         });
         t.start();
