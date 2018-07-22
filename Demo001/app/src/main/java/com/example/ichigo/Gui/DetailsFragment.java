@@ -129,7 +129,7 @@ public class DetailsFragment extends Fragment {
 
     }
 
-    String path = "Storage/emulated/0/download";
+    String path = "Download";
 
     @Override
     public void onActivityResult(int requestcode, int resultcode, Intent data) {
