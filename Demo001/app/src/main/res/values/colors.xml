@@ -8,4 +8,9 @@
     <color name="primary_material_dark">#004d99</color>
     <color name="progressbarbackground"> #000000 </color>
     <color name="progress"> #000000 </color>
+    <color name="accent">#008060</color>
+    <color name="primary">#006080</color>
+    <color name="primary_dark">#006080</color>
+
+
 </resources>

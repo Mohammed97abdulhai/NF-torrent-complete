@@ -24,6 +24,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.asus.Core.base.Torrent;
+import com.nononsenseapps.filepicker.FilePickerActivity;
+import com.nononsenseapps.filepicker.Utils;
+
+import java.io.File;
+import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -98,8 +103,26 @@ public class DetailsFragment extends Fragment {
         location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                i.addCategory(Intent.CATEGORY_DEFAULT);
+               // Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+               // i.addCategory(Intent.CATEGORY_DEFAULT);
+               // startActivityForResult(i, 1);
+
+                // This always works
+                Context context = DetailsFragment.this.getContext();
+                Intent i = new Intent(context, FilePickerActivity.class);
+                // This works if you defined the intent filter
+                // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+
+                // Set these depending on your use case. These are the defaults.
+                i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
+                i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_DIR);
+
+                // Configure initial directory by specifying a String.
+                // You could specify a String like "/storage/emulated/0/", but that can
+                // dangerous. Always use Android's API calls to get paths to the SD-card or
+                // internal memory.
+                i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
+
                 startActivityForResult(i, 1);
             }
         });
@@ -136,12 +159,24 @@ public class DetailsFragment extends Fragment {
         switch (requestcode) {
             case 1:
                 if (resultcode == RESULT_OK) {
+
                     Log.i("info","the path befor modify"+data.getData().getPath());
-                    path =  data.getData().getPath().substring(data.getData().getPath().lastIndexOf(":")+1);
-                    Log.i("info", "the uri for the directory chosen is: ================ " + path);
-                    EditText location = (EditText) view.findViewById(R.id.downloadlocationedit);
-                    location.setText(path);
+                    //path = data.getData().getPath();
+
+                    //path =  data.getData().getPath().substring(data.getData().getPath().lastIndexOf(":")+1);
+                    List<Uri> files = Utils.getSelectedFilesFromResult(data);
+                    for (Uri uri: files) {
+                        File file = Utils.getFileForUri(uri);
+                        // Do something with the result...
+                        path = file.getPath();
+                        EditText location = (EditText) view.findViewById(R.id.downloadlocationedit);
+                        location.setText(path);
+                        Log.i("info", "the uri for the directory chosen is: ================ " + path);
+
+
+                    }
                 }
+
         }
     }
 

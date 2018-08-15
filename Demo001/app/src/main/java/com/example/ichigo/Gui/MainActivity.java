@@ -34,6 +34,7 @@ import android.widget.Toast;
 import com.example.asus.Core.base.Torrent;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import com.nononsenseapps.filepicker.FilePickerActivity;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -178,8 +179,24 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     { switch(item.getItemId()) {
         case R.id.bookmsrk:
         {
-            Intent i=new Intent(Intent.ACTION_GET_CONTENT);
-            i.setType("application/x-bittorrent");
+            //Intent i=new Intent(Intent.ACTION_GET_CONTENT);
+           // i.setType("application/x-bittorrent");
+            //startActivityForResult(i, 1);
+            // This always works
+            Intent i = new Intent(this, FilePickerActivity.class);
+            // This works if you defined the intent filter
+            // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+
+            // Set these depending on your use case. These are the defaults.
+            i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
+            i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE);
+
+            // Configure initial directory by specifying a String.
+            // You could specify a String like "/storage/emulated/0/", but that can
+            // dangerous. Always use Android's API calls to get paths to the SD-card or
+            // internal memory.
+            i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
+
             startActivityForResult(i, 1);
         }
         return(true);
@@ -225,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     Log.i("info",torrent.getName());
                     if(permissiongranted) {
                         try {
-                            torrent_service.add_torrent(torrent, new File(Environment.getExternalStorageDirectory(), "/"+ save_location), id);
+                            torrent_service.add_torrent(torrent, new File(save_location), id);
                         } catch (IOException e) {
                             e.printStackTrace();
                         } catch (NoSuchAlgorithmException e) {
